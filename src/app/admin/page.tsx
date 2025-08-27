@@ -21,9 +21,8 @@ export default function AdminDashboard() {
     // Check if user is admin (you can implement your own admin logic here)
     // For now, we'll check if the email contains 'admin' or if it's a specific email
     if (user) {
-      const adminEmails = ['admin@arcane.com', 'michael@example.com'] // Add your admin emails
-      const isUserAdmin = adminEmails.includes(user.email?.toLowerCase() || '') || 
-                         (user.email?.toLowerCase() || '').includes('admin')
+      const adminEmails = ['alpinereasoningcontest@gmail.com', 'zhengm58@gmail.com'] // Add your admin emails
+      const isUserAdmin = adminEmails.includes(user.email?.toLowerCase() || '')
       setIsAdmin(isUserAdmin)
       
       if (!isUserAdmin) {
