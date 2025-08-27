@@ -1,7 +1,0 @@
-I'm developing a nextjs/supabase website hosted on vercel. It MUST be reactive and support phones, tablets, and computers. The website is for "Arcane", a virtual puzzle hunt competition with a stylized magic/runic theme. The home page should have information/details about the competition, including a hero page and a FAQ.
-
-Users must authentacate by making an account/logging in before being able to access their dashboard. 
-
-- Mail system, 
-
-Based on this information, can you generate a set of describing this website in detail in markdown?
