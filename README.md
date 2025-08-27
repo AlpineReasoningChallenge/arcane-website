@@ -211,7 +211,7 @@ For support or questions:
 - [ ] Puzzle hints system
 - [ ] Achievement badges
 - [ ] Social sharing
-- [ ] Admin dashboard
+
 - [ ] Analytics and insights
 
 ---

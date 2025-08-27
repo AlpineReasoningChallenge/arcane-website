@@ -71,5 +71,5 @@ After setup, consider:
 - Customizing puzzle content and images
 - Setting competition dates
 - Implementing answer validation logic
-- Adding admin features
+
 - Setting up monitoring and analytics

@@ -49,6 +49,8 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
         })
         if (error) throw error
         onSuccess()
+        // Force immediate redirect to dashboard
+        window.location.href = '/dashboard'
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred'
@@ -60,21 +62,30 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-white mb-2">
-            {isSignUp ? 'Join the Hunt' : 'Enter the Realm'}
+      <div className="bg-surface/90 backdrop-blur-lg rounded-3xl p-10 shadow-2xl border border-secondary/30">
+        <div className="text-center mb-10">
+          {/* Arcane Logo */}
+          <div className="inline-flex items-center justify-center mb-6">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 bg-black rounded-lg transform rotate-45"></div>
+              <div className="absolute inset-2 bg-surface rounded-lg transform rotate-45"></div>
+              <div className="absolute inset-4 bg-secondary rounded-lg transform rotate-45 animate-pulse-glow"></div>
+            </div>
+          </div>
+          
+          <h2 className="text-4xl font-arcane text-white mb-3 tracking-wider">
+            {isSignUp ? 'JOIN THE HUNT' : 'ENTER THE REALM'}
           </h2>
-          <p className="text-gray-300">
+          <p className="text-gray-300 text-lg font-light">
             {isSignUp ? 'Create your account to begin' : 'Sign in to continue your journey'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {isSignUp && (
             <>
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="username" className="block text-lg font-medium text-gray-300 mb-3">
                   Username
                 </label>
                 <input
@@ -82,13 +93,13 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-6 py-4 bg-surface-light/50 border border-secondary/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent text-lg transition-all duration-300"
                   placeholder="Choose a username"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="fullName" className="block text-lg font-medium text-gray-300 mb-3">
                   Full Name
                 </label>
                 <input
@@ -96,7 +107,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-6 py-4 bg-surface-light/50 border border-secondary/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent text-lg transition-all duration-300"
                   placeholder="Enter your full name"
                   required
                 />
@@ -105,7 +116,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="email" className="block text-lg font-medium text-gray-300 mb-3">
               Email
             </label>
             <input
@@ -113,14 +124,14 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-6 py-4 bg-surface-light/50 border border-secondary/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent text-lg transition-all duration-300"
               placeholder="Enter your email"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="password" className="block text-lg font-medium text-gray-300 mb-3">
               Password
             </label>
             <div className="relative">
@@ -129,22 +140,22 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-12"
+                className="w-full px-6 py-4 bg-surface-light/50 border border-secondary/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent pr-16 text-lg transition-all duration-300"
                 placeholder="Enter your password"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-secondary transition-colors"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}
               </button>
             </div>
           </div>
 
           {error && (
-            <div className={`rounded-lg p-3 text-sm border ${
+            <div className={`rounded-xl p-4 text-lg border ${
               error === 'Check your email for the confirmation link!' 
                 ? 'bg-green-500/20 border-green-500/50 text-green-300' 
                 : 'bg-red-500/20 border-red-500/50 text-red-300'
@@ -156,11 +167,11 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            className="w-full bg-gradient-glow text-white font-bold py-4 px-6 rounded-xl hover:shadow-glow-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-surface disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-lg border-2 border-white/30 hover:border-white/50 shadow-lg hover:shadow-2xl transform hover:scale-105"
           >
             {loading ? (
               <div className="flex items-center justify-center">
-                <Loader2 className="animate-spin mr-2" size={20} />
+                <Loader2 className="animate-spin mr-3" size={24} />
                 {isSignUp ? 'Creating Account...' : 'Signing In...'}
               </div>
             ) : (
@@ -169,10 +180,10 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-8 text-center">
           <button
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-gray-300 hover:text-white transition-colors"
+            className="text-gray-300 hover:text-secondary transition-colors text-lg font-medium"
           >
             {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
           </button>

@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { sanitizeInput } from '@/lib/utils'
-import { X, CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { X, CheckCircle, XCircle, Loader2, Clock, Lock } from 'lucide-react'
 
 interface Puzzle {
   id: number
@@ -27,17 +27,46 @@ interface PuzzleModalProps {
   onClose: () => void
   onSubmission: () => void
   userAttempts: UserAttempt[]
+  submissionsAllowed: boolean
+  competitionStart?: Date | null
+  competitionEnd?: Date | null
 }
 
-export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempts }: PuzzleModalProps) {
+export default function PuzzleModal({ 
+  puzzle, 
+  onClose, 
+  onSubmission, 
+  userAttempts, 
+  submissionsAllowed,
+  competitionStart,
+  competitionEnd 
+}: PuzzleModalProps) {
   const { user } = useAuth()
   const [answer, setAnswer] = useState('')
   const [loading, setLoading] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
   const [statusType, setStatusType] = useState<'success' | 'error' | ''>('')
   const [showStatus, setShowStatus] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
 
-  const existingAttempt = userAttempts.find(a => a.puzzle_id === puzzle.id)
+  // Get current competition status
+  const competitionStatus = useMemo(() => {
+    if (!competitionStart || !competitionEnd) return 'not-configured'
+    
+    const now = new Date().getTime()
+    const startTime = competitionStart.getTime()
+    const endTime = competitionEnd.getTime()
+    
+    if (now < startTime) return 'not-started'
+    if (now >= endTime) return 'ended'
+    return 'active'
+  }, [competitionStart, competitionEnd])
+
+  // Memoize existing attempt to prevent recalculation
+  const existingAttempt = useMemo(() =>
+    userAttempts.find(a => a.puzzle_id === puzzle.id),
+    [userAttempts, puzzle.id]
+  )
 
   useEffect(() => {
     if (existingAttempt) {
@@ -45,9 +74,54 @@ export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempt
     }
   }, [existingAttempt])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle click outside modal to close
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        handleClose()
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  // Memoize the submit handler to prevent recreation on every render
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !answer.trim()) return
+
+    // For puzzle ID 0 (tutorial), bypass submission restrictions and database
+    if (puzzle.id === 0) {
+      setLoading(true)
+      setStatusMessage('')
+      setStatusType('')
+      setShowStatus(false)
+
+      // Check if answer is "0" for tutorial
+      if (answer.trim() === '0') {
+        setStatusMessage('Correct! You have completed the tutorial.')
+        setStatusType('success')
+        setShowStatus(true)
+      } else {
+        setStatusMessage('Incorrect. Yo we told you the answer is 0 😭—are you even listening to us?!?!?')
+        setStatusType('error')
+        setShowStatus(true)
+      }
+
+      // Hide status message after 3 seconds
+      setTimeout(() => {
+        setShowStatus(false)
+      }, 3000)
+
+      setLoading(false)
+      return
+    }
+
+    // For other puzzles, check if submissions are allowed
+    if (!submissionsAllowed) return
 
     setLoading(true)
     setStatusMessage('')
@@ -63,9 +137,8 @@ export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempt
         // Update existing attempt
         result = await supabase
           .from('user_puzzle_attempts')
-          .update({ 
+          .update({
             answer: sanitizedAnswer,
-            is_correct: false, // You'll need to implement answer validation logic
             submitted_at: new Date().toISOString()
           })
           .eq('id', existingAttempt.id)
@@ -77,14 +150,13 @@ export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempt
             user_id: user.id,
             puzzle_id: puzzle.id,
             answer: sanitizedAnswer,
-            is_correct: false // You'll need to implement answer validation logic
           })
       }
 
       if (result.error) throw result.error
 
       // Show success message
-      setStatusMessage('Answer submitted successfully!')
+      setStatusMessage('Answer submitted successfully! You will be emailed if the submission is correct.')
       setStatusType('success')
       setShowStatus(true)
 
@@ -104,22 +176,45 @@ export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempt
     } finally {
       setLoading(false)
     }
-  }
+  }, [user, answer, existingAttempt, puzzle.id, onSubmission, submissionsAllowed])
 
-  const handleClose = () => {
+  // Memoize the close handler
+  const handleClose = useCallback(() => {
     setAnswer('')
     setStatusMessage('')
     setStatusType('')
     setShowStatus(false)
     onClose()
+  }, [onClose])
+
+  // Memoize status styling to prevent recalculation
+  const statusStyling = useMemo(() => {
+    if (statusType === 'success') {
+      return 'bg-green-500/20 border-green-500/50 text-green-300'
+    }
+    return 'bg-red-500/20 border-red-500/50 text-red-300'
+  }, [statusType])
+
+  // Get submission status message
+  const getSubmissionStatusMessage = () => {
+    switch (competitionStatus) {
+      case 'not-configured':
+        return 'Competition timing not configured'
+      case 'not-started':
+        return 'Competition has not started yet'
+      case 'ended':
+        return 'Competition has ended'
+      default:
+        return null
+    }
   }
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-gray-900/95 backdrop-blur-lg rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-purple-500/30 shadow-2xl">
+      <div ref={modalRef} className="bg-surface/95 backdrop-blur-lg rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-secondary/30 shadow-glow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-purple-500/30">
-          <h2 className="text-2xl font-bold text-white">{puzzle.name}</h2>
+        <div className="flex items-center justify-between p-6 border-b border-secondary/30">
+          <h2 className="text-2xl font-bold text-white font-arcane">{puzzle.name}</h2>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
@@ -137,15 +232,39 @@ export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempt
               alt={puzzle.name}
               width={800}
               height={600}
-              className="w-full h-auto rounded-lg border border-purple-500/30"
+              className="w-full h-auto rounded-lg border border-secondary/30"
             />
           </div>
 
           {/* Description */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-white mb-2">Description</h3>
-            <p className="text-gray-300 leading-relaxed">{puzzle.description}</p>
+            <div 
+              className="text-gray-300 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: puzzle.description }}
+            />
           </div>
+
+          {/* Submission Status Warning - Only show for non-tutorial puzzles */}
+          {!submissionsAllowed && puzzle.id !== 0 && (
+            <div className="mb-6 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
+              <div className="flex items-center gap-2 text-yellow-300">
+                {competitionStatus === 'not-started' ? (
+                  <Clock size={20} />
+                ) : (
+                  <Lock size={20} />
+                )}
+                <span className="font-medium">
+                  {getSubmissionStatusMessage()}
+                </span>
+              </div>
+              {competitionStart && competitionEnd && (
+                <div className="mt-2 text-sm text-yellow-400">
+                  Competition runs from {competitionStart.toLocaleDateString()} to {competitionEnd.toLocaleDateString()}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Answer form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -157,21 +276,17 @@ export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempt
                 id="answer"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                placeholder="Enter your answer here..."
-                rows={4}
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder={puzzle.id === 0 ? "Enter '0' to complete the tutorial" : (submissionsAllowed ? "Enter your answer here..." : "Submissions are currently disabled")}
+                rows={2}
                 required
-                disabled={loading}
+                disabled={loading || (puzzle.id !== 0 && !submissionsAllowed)}
               />
             </div>
 
             {/* Status message */}
             {showStatus && (
-              <div className={`p-4 rounded-lg border ${
-                statusType === 'success' 
-                  ? 'bg-green-500/20 border-green-500/50 text-green-300' 
-                  : 'bg-red-500/20 border-red-500/50 text-red-300'
-              }`}>
+              <div className={`p-4 rounded-lg border ${statusStyling}`}>
                 <div className="flex items-center gap-2">
                   {statusType === 'success' ? (
                     <CheckCircle size={20} className="text-green-400" />
@@ -186,14 +301,18 @@ export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempt
             {/* Submit button */}
             <button
               type="submit"
-              disabled={loading || !answer.trim()}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              disabled={loading || !answer.trim() || (puzzle.id !== 0 && !submissionsAllowed)}
+              className="w-full bg-gradient-glow text-white font-bold py-3 px-6 rounded-xl hover:shadow-glow-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-surface disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-2 border-white/30 hover:border-white/50 shadow-lg hover:shadow-2xl transform hover:scale-105"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
                   <Loader2 className="animate-spin mr-2" size={20} />
                   Submitting...
                 </div>
+              ) : puzzle.id === 0 ? (
+                'Complete Tutorial'
+              ) : !submissionsAllowed ? (
+                'Submissions Disabled'
               ) : (
                 existingAttempt ? 'Update Answer' : 'Submit Answer'
               )}
@@ -208,9 +327,13 @@ export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempt
                 You previously submitted: <span className="text-white">{existingAttempt.answer}</span>
               </p>
               <p className="text-sm text-gray-400 mt-1">
-                Status: <span className={existingAttempt.is_correct ? 'text-green-400' : 'text-yellow-400'}>
-                  {existingAttempt.is_correct ? 'Correct' : 'Incorrect'}
-                </span>
+                Status: {existingAttempt.is_correct === true ? (
+                  <span className="text-green-400">Correct</span>
+                ) : existingAttempt.is_correct === false ? (
+                  <span className="text-red-400">Incorrect</span>
+                ) : (
+                  <span className="text-yellow-400">In Progress</span>
+                )}
               </p>
             </div>
           )}
