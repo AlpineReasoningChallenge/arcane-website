@@ -8,6 +8,7 @@ CREATE TABLE public.profiles (
   username TEXT UNIQUE,
   full_name TEXT,
   avatar_url TEXT,
+  ip_address TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -95,8 +96,8 @@ INSERT INTO public.puzzles (name, description, image_url, modal_image_url) VALUE
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, username, full_name)
-  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'username', NEW.raw_user_meta_data->>'full_name');
+  INSERT INTO public.profiles (id, email, username, full_name, ip_address)
+  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'username', NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'ip_address');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

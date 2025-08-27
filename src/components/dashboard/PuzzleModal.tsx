@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { sanitizeInput } from '@/lib/utils'
 import { X, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 
 interface Puzzle {
@@ -55,7 +56,7 @@ export default function PuzzleModal({ puzzle, onClose, onSubmission, userAttempt
 
     try {
       // Sanitize input to prevent SQL injection
-      const sanitizedAnswer = answer.trim().toLowerCase().replace(/[<>'"]/g, '')
+      const sanitizedAnswer = sanitizeInput(answer)
 
       let result
       if (existingAttempt) {

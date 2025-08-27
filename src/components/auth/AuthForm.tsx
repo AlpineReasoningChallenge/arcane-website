@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getUserIPAddress } from '@/lib/utils'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
 interface AuthFormProps {
@@ -25,6 +26,9 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
 
     try {
       if (isSignUp) {
+        // Get user's IP address
+        const ipAddress = await getUserIPAddress()
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -32,6 +36,7 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
             data: {
               username,
               full_name: fullName,
+              ip_address: ipAddress,
             },
           },
         })
@@ -139,7 +144,11 @@ export default function AuthForm({ onSuccess }: AuthFormProps) {
           </div>
 
           {error && (
-            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-red-300 text-sm">
+            <div className={`rounded-lg p-3 text-sm border ${
+              error === 'Check your email for the confirmation link!' 
+                ? 'bg-green-500/20 border-green-500/50 text-green-300' 
+                : 'bg-red-500/20 border-red-500/50 text-red-300'
+            }`}>
               {error}
             </div>
           )}

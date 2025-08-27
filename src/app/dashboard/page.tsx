@@ -64,6 +64,16 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-300">Welcome, {user.email}</span>
+              {/* Admin link - only show for admin users */}
+              {(user.email?.toLowerCase().includes('admin') || 
+                ['admin@arcane.com', 'michael@example.com'].includes(user.email?.toLowerCase() || '')) && (
+                <button
+                  onClick={() => router.push('/admin')}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Admin Panel
+                </button>
+              )}
               <button
                 onClick={() => supabase.auth.signOut()}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
