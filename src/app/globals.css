@@ -36,6 +36,7 @@ body {
   font-family: var(--font-sans);
   background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
   min-height: 100vh;
+  scroll-behavior: smooth;
 }
 
 /* Glitch Text Effect */

@@ -126,7 +126,7 @@ export default function Home() {
         </div>
         
         <div className="max-w-7xl mx-auto text-center relative z-10">
-          <div className="mb-12">
+          <div className="mb-8">
             {/* Central Arcane Symbol */}
             <div className="inline-flex items-center justify-center mb-8">
               <div className="relative w-32 h-32">
@@ -150,10 +150,10 @@ export default function Home() {
             ARCANE
           </h2>
           
-          <p className="text-2xl md:text-3xl text-gray-300 max-w-4xl mx-auto mb-12 leading-relaxed font-light">
-            Embark on a mystical journey through the mountains. Retrace the steps of those before you by analyzing{' '}
+          <p className="text-2xl md:text-3xl text-gray-300 max-w-4xl mx-auto mb-8 leading-relaxed font-light">
+            Embark on a mystical journey through the mountains. Retrace the steps of those before you by deciphering{' '}
             <span className="glitch-text text-secondary font-bold" data-text="7 artifacts">7 artifacts</span>
-            {' '}and rediscover secrets of the past.
+            {' '}and rediscover long-gone secrets.
           </p>
           
           <div className="flex justify-center">
@@ -179,7 +179,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-5xl font-arcane text-white mb-8 tracking-wider">THE STORY SO FAR</h2>
           <p className="text-xl text-gray-300 max-w-5xl mx-auto mb-10 leading-relaxed font-light">
-            At 1,434m above sea level in the Canadian Rockies, you are trapped by a blizzard and your equipment is lost. Searching for your gear, you find a <span className="text-orange-400 font-semibold">neon orange backpack</span>. Inside, there is a peculiar <span className="glitch-text text-secondary font-bold" data-text="notebook">notebook</span>—ink running in splotches, pages damaged by water—and a faint date referring to a time three decades ago...what happened to the hiker to whom it belonged?
+            At 1,434m above <span className="underline decoration-blue-800 decoration-wavy">sea level</span> in the Canadian Rockies, you are trapped by a blizzard and your equipment has disappeared. Searching for your gear, you find a <span className="text-orange-500 font-semibold drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]">neon orange backpack</span>. Inside, there is a peculiar <span className="glitch-text text-secondary font-bold" data-text="notebook">notebook</span>—ink running in splotches, pages damaged by water—and a faint date referring to a time three decades ago...what happened to the hiker to whom it belonged?
           </p>
           <p className="text-center font-bold text-2xl">
             Nine pages. Seven puzzles. Thirty days.
@@ -239,7 +239,7 @@ export default function Home() {
                   &nbsp;&nbsp;&nbsp;&nbsp;The stars still hang brightly above the slopes as you wake with a jolt. You jerk awake; where was your equipment? Perhaps, you think, it was left behind unnoticed as you were encapsulated by the serene beauty of the range. The sudden onset of panic causes you to hurriedly walk back onto the dark slope—you catch a glance of a neon orange backpack amidst the rocks—you frantically gasp for air as you finally reach it… the night and the soreness cloud your thoughts; you begin to recall that your backpack was green—who else would be here, hundreds of kilometers into the unmapped wilderness? You carry the bag on your back; the familiar weight of hiking gear was strangely absent. As the snow begins to cascade down the jet-black sky, you reach the cave just in time. The climb back up would be unfeasible with such thick snow; there was nothing to do besides waiting.
                 </p>
                 <p>
-                  &nbsp;&nbsp;&nbsp;&nbsp;Your numb fingers fumble with the zipper. The backpack contained nothing but a jumble of torn pages from a notebook; each one hastily scrawled upon. The yellowed pages were almost illegible—the ink running in splotches, the pages damaged by water—a faint date on one of the pages referred to a time three decades ago… what happened to the hiker to whom the backpack belonged?
+                  &nbsp;&nbsp;&nbsp;&nbsp;Your numb fingers fumble with the zipper. The backpack contained nothing but a jumble of torn pages from a <span className="glitch-text text-secondary font-bold" data-text="notebook">notebook</span>; each one hastily scrawled upon. The yellowed pages were almost illegible—the ink running in splotches, the pages damaged by water—a faint date on one of the pages referred to a time three decades ago… what happened to the hiker to whom the backpack belonged?
                 </p>
                 <p className="text-center font-bold text-xl">
                   Nine pages. Seven puzzles. Thirty days.
@@ -251,7 +251,7 @@ export default function Home() {
       )}
 
       {/* FAQ Section */}
-      <section className="py-32 px-4 sm:px-6 lg:px-8">
+      <section id="faq" className="py-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-5xl font-arcane text-white mb-6 tracking-wider">FREQUENTLY ASKED QUESTIONS</h2>

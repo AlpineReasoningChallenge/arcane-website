@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { isAfterTimestamp, isBeforeTimestamp } from '@/lib/utils'
 
 interface TimeLeft {
   days: number
@@ -21,17 +22,16 @@ export default function CountdownTimer({ targetDate, endDate }: CountdownTimerPr
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = new Date().getTime()
-      const startTime = targetDate.getTime()
-      const endTime = endDate ? endDate.getTime() : null
+      // Use timezone-aware utility functions for proper timestamptz handling
+      const now = new Date()
       
       // Check if hunt has started
-      if (now >= startTime) {
+      if (isAfterTimestamp(targetDate)) {
         setIsHuntLive(true)
         
         // If hunt has started, count down to end date
-        if (endTime && now < endTime) {
-          const difference = endTime - now
+        if (endDate && isBeforeTimestamp(endDate)) {
+          const difference = endDate.getTime() - now.getTime()
           setTimeLeft({
             days: Math.floor(difference / (1000 * 60 * 60 * 24)),
             hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
@@ -39,7 +39,7 @@ export default function CountdownTimer({ targetDate, endDate }: CountdownTimerPr
             seconds: Math.floor((difference / 1000) % 60),
           })
           setIsHuntEnded(false)
-        } else if (endTime && now >= endTime) {
+        } else if (endDate && isAfterTimestamp(endDate)) {
           // Hunt has ended
           setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 })
           setIsHuntEnded(true)
@@ -52,7 +52,7 @@ export default function CountdownTimer({ targetDate, endDate }: CountdownTimerPr
         // Hunt hasn't started yet, count down to start
         setIsHuntLive(false)
         setIsHuntEnded(false)
-        const difference = startTime - now
+        const difference = targetDate.getTime() - now.getTime()
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),

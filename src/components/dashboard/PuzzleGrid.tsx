@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { isBetweenTimestamps } from '@/lib/utils'
 import PuzzleModal from './PuzzleModal'
 
 interface Puzzle {
@@ -34,14 +35,12 @@ export default function PuzzleGrid({ competitionStart, competitionEnd }: PuzzleG
 
   // Check if submissions are currently allowed
   const submissionsAllowed = useMemo(() => {
-    if (!competitionStart || !competitionEnd) return false
+    // Admin user can always submit regardless of dates
+    if (user?.email === 'alpinereasoningcontest@gmail.com') return true
     
-    const now = new Date().getTime()
-    const startTime = competitionStart.getTime()
-    const endTime = competitionEnd.getTime()
-    
-    return now >= startTime && now < endTime
-  }, [competitionStart, competitionEnd])
+    // Use timezone-aware utility function for proper timestamptz handling
+    return isBetweenTimestamps(competitionStart || null, competitionEnd || null)
+  }, [competitionStart, competitionEnd, user?.email])
 
   // Memoize fetch functions to prevent recreation on every render
   const fetchPuzzles = useCallback(async () => {
@@ -97,10 +96,9 @@ export default function PuzzleGrid({ competitionStart, competitionEnd }: PuzzleG
     return puzzles1to7.length === 7 && puzzles1to7.every(attempt => attempt.is_correct)
   }, [userAttempts])
 
-  // Filter puzzles to exclude ID 0 and conditionally include ID 8
+  // Filter puzzles to conditionally include ID 8
   const filteredPuzzles = useMemo(() => {
     return puzzles.filter(puzzle => {
-      if (puzzle.id === 0) return false // Always exclude puzzle ID 0
       if (puzzle.id === 8) return allPuzzlesCompleted // Only show puzzle 8 when all others are completed
       return puzzle.id >= 1 && puzzle.id <= 7 // Always show puzzles 1-7
     })
@@ -144,7 +142,8 @@ export default function PuzzleGrid({ competitionStart, competitionEnd }: PuzzleG
 
   // Memoize puzzle positions to prevent recalculation on every render
   const puzzlePositions = useMemo(() => {
-    const radius = 200
+    // Responsive radius based on screen size
+    const radius = typeof window !== 'undefined' && window.innerWidth < 768 ? 120 : 200
     const centerX = 0
     const centerY = 0
 
@@ -220,7 +219,7 @@ export default function PuzzleGrid({ competitionStart, competitionEnd }: PuzzleG
       )}
 
       {/* Puzzle circles arranged in a circle */}
-      <div className="relative w-full h-[600px] md:h-[700px]">
+      <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px]">
         {puzzlePositions.map(({ puzzle, x, y, angle, status, isCenter }) => (
           <div
             key={puzzle.id}
@@ -232,7 +231,7 @@ export default function PuzzleGrid({ competitionStart, competitionEnd }: PuzzleG
             onClick={() => setSelectedPuzzle(puzzle)}
           >
             {/* Puzzle circle */}
-            <div className={`relative ${isCenter ? 'w-32 h-32 md:w-40 md:h-40' : 'w-24 h-24 md:w-32 md:h-32'} rounded-full border-4 ${getStatusColor(status)} overflow-hidden transition-all duration-300 group-hover:border-secondary group-hover:shadow-glow-xl group-hover:shadow-secondary/50`}>
+            <div className={`relative ${isCenter ? 'w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-40 lg:h-40' : 'w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32'} rounded-full border-4 ${getStatusColor(status)} overflow-hidden transition-all duration-300 group-hover:border-secondary group-hover:shadow-glow-xl group-hover:shadow-secondary/50`}>
               {/* Background image */}
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat opacity-80 group-hover:opacity-100 transition-opacity duration-300"
@@ -243,7 +242,7 @@ export default function PuzzleGrid({ competitionStart, competitionEnd }: PuzzleG
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center group-hover:bg-black/40 transition-colors duration-300">
                 <div className="text-center">
                   <div className="text-2xl mb-1">{getStatusIcon(status)}</div>
-                  <div className={`text-white font-medium px-2 leading-tight ${isCenter ? 'text-sm md:text-base' : 'text-xs md:text-sm'}`}>
+                  <div className={`text-white font-medium px-2 leading-tight ${isCenter ? 'text-xs sm:text-sm md:text-base' : 'text-xs'} hidden sm:block`}>
                     {puzzle.name}
                   </div>
                 </div>

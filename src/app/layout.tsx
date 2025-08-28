@@ -5,9 +5,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Arcane - Mystical Puzzle Hunt Competition",
-  description: "Embark on a mystical journey through seven ancient seals. Decipher runes, solve puzzles, and claim your place among the arcane masters.",
+export const metadata: Metadata = { // embeded on discord, etc
+  title: "Arcane - A Virtural Puzzle Hunt",
+  description: "Embark on a mystical journey through the mountains. Retrace the steps of those before you by deciphering 7 artifacts and rediscover secrets of the past.",
 };
 
 export default function RootLayout({

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
-import { sanitizeInput } from '@/lib/utils'
+import { sanitizeInput, isAfterTimestamp, isBeforeTimestamp } from '@/lib/utils'
 import { X, CheckCircle, XCircle, Loader2, Clock, Lock } from 'lucide-react'
 
 interface Puzzle {
@@ -53,12 +53,9 @@ export default function PuzzleModal({
   const competitionStatus = useMemo(() => {
     if (!competitionStart || !competitionEnd) return 'not-configured'
     
-    const now = new Date().getTime()
-    const startTime = competitionStart.getTime()
-    const endTime = competitionEnd.getTime()
-    
-    if (now < startTime) return 'not-started'
-    if (now >= endTime) return 'ended'
+    // Use timezone-aware utility functions for proper timestamptz handling
+    if (isBeforeTimestamp(competitionStart)) return 'not-started'
+    if (isAfterTimestamp(competitionEnd)) return 'ended'
     return 'active'
   }, [competitionStart, competitionEnd])
 
@@ -93,34 +90,7 @@ export default function PuzzleModal({
     e.preventDefault()
     if (!user || !answer.trim()) return
 
-    // For puzzle ID 0 (tutorial), bypass submission restrictions and database
-    if (puzzle.id === 0) {
-      setLoading(true)
-      setStatusMessage('')
-      setStatusType('')
-      setShowStatus(false)
-
-      // Check if answer is "0" for tutorial
-      if (answer.trim() === '0') {
-        setStatusMessage('Correct! You have completed the tutorial.')
-        setStatusType('success')
-        setShowStatus(true)
-      } else {
-        setStatusMessage('Incorrect. Yo we told you the answer is 0 😭—are you even listening to us?!?!?')
-        setStatusType('error')
-        setShowStatus(true)
-      }
-
-      // Hide status message after 3 seconds
-      setTimeout(() => {
-        setShowStatus(false)
-      }, 3000)
-
-      setLoading(false)
-      return
-    }
-
-    // For other puzzles, check if submissions are allowed
+    // Check if submissions are allowed
     if (!submissionsAllowed) return
 
     setLoading(true)
@@ -128,35 +98,39 @@ export default function PuzzleModal({
     setStatusType('')
     setShowStatus(false)
 
-    try {
-      // Sanitize input to prevent SQL injection
-      const sanitizedAnswer = sanitizeInput(answer)
+          try {
+        // Sanitize input to prevent SQL injection
+        const sanitizedAnswer = sanitizeInput(answer)
 
-      let result
-      if (existingAttempt) {
-        // Update existing attempt
-        result = await supabase
-          .from('user_puzzle_attempts')
-          .update({
-            answer: sanitizedAnswer,
-            submitted_at: new Date().toISOString()
-          })
-          .eq('id', existingAttempt.id)
-      } else {
-        // Create new attempt
-        result = await supabase
-          .from('user_puzzle_attempts')
-          .insert({
-            user_id: user.id,
-            puzzle_id: puzzle.id,
-            answer: sanitizedAnswer,
-          })
-      }
+        let result
+        if (existingAttempt) {
+          // Update existing attempt
+          result = await supabase
+            .from('user_puzzle_attempts')
+            .update({
+              answer: sanitizedAnswer,
+              submitted_at: new Date().toISOString() // This will be converted to UTC by Supabase
+            })
+            .eq('id', existingAttempt.id)
+        } else {
+          // Create new attempt
+          result = await supabase
+            .from('user_puzzle_attempts')
+            .insert({
+              user_id: user.id,
+              puzzle_id: puzzle.id,
+              answer: sanitizedAnswer,
+            })
+        }
 
       if (result.error) throw result.error
 
       // Show success message
-      setStatusMessage('Answer submitted successfully! You will be emailed if the submission is correct.')
+      if (puzzle.id === 0) {
+        setStatusMessage('Answers are normally only graded twice a day. For this tutorial, we\'ve instantly graded it. Scroll down to see the result!')
+      } else {
+        setStatusMessage('Answer submitted successfully! You will be emailed if the submission is correct.')
+      }
       setStatusType('success')
       setShowStatus(true)
 
@@ -166,7 +140,7 @@ export default function PuzzleModal({
       // Hide status message after 3 seconds
       setTimeout(() => {
         setShowStatus(false)
-      }, 3000)
+      }, 6000)
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred'
@@ -190,10 +164,14 @@ export default function PuzzleModal({
   // Memoize status styling to prevent recalculation
   const statusStyling = useMemo(() => {
     if (statusType === 'success') {
+      // Special yellow styling for tutorial puzzle
+      if (puzzle.id === 0) {
+        return 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'
+      }
       return 'bg-green-500/20 border-green-500/50 text-green-300'
     }
     return 'bg-red-500/20 border-red-500/50 text-red-300'
-  }, [statusType])
+  }, [statusType, puzzle.id])
 
   // Get submission status message
   const getSubmissionStatusMessage = () => {
@@ -245,8 +223,8 @@ export default function PuzzleModal({
             />
           </div>
 
-          {/* Submission Status Warning - Only show for non-tutorial puzzles */}
-          {!submissionsAllowed && puzzle.id !== 0 && (
+          {/* Submission Status Warning */}
+          {!submissionsAllowed && (
             <div className="mb-6 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
               <div className="flex items-center gap-2 text-yellow-300">
                 {competitionStatus === 'not-started' ? (
@@ -280,7 +258,7 @@ export default function PuzzleModal({
                 placeholder={puzzle.id === 0 ? "Enter '0' to complete the tutorial" : (submissionsAllowed ? "Enter your answer here..." : "Submissions are currently disabled")}
                 rows={2}
                 required
-                disabled={loading || (puzzle.id !== 0 && !submissionsAllowed)}
+                disabled={loading || !submissionsAllowed}
               />
             </div>
 
@@ -301,7 +279,7 @@ export default function PuzzleModal({
             {/* Submit button */}
             <button
               type="submit"
-              disabled={loading || !answer.trim() || (puzzle.id !== 0 && !submissionsAllowed)}
+              disabled={loading || !answer.trim() || !submissionsAllowed}
               className="w-full bg-gradient-glow text-white font-bold py-3 px-6 rounded-xl hover:shadow-glow-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-surface disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-2 border-white/30 hover:border-white/50 shadow-lg hover:shadow-2xl transform hover:scale-105"
             >
               {loading ? (
@@ -309,8 +287,6 @@ export default function PuzzleModal({
                   <Loader2 className="animate-spin mr-2" size={20} />
                   Submitting...
                 </div>
-              ) : puzzle.id === 0 ? (
-                'Complete Tutorial'
               ) : !submissionsAllowed ? (
                 'Submissions Disabled'
               ) : (
