@@ -35,7 +35,7 @@ export default function Home() {
     },
     {
       question: "What do we win?",
-      answer: "EVERYONE who completes all puzzles will win [tbd]. The top three participants will respectively win [tbd]. For these winners, a video call with the Arcane team will be required to redeem their prizes."
+      answer: "There is a total prize pool of $200 CAD. For the winners, a video call with the Arcane team will be required to redeem their prizes."
     },
     {
       question: "When does the competition start?",
