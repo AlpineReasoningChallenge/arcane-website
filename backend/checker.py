@@ -84,6 +84,10 @@ def check_and_update_answers():
 
 def init_scheduler():
     global next_run_time
+    # Run initial check before starting the loop
+    print("[INFO] Running initial check...")
+    check_and_update_answers()
+    
     while True:
         next_run_time = time.time() + iteration_hours * 3600
         countdown_thread = threading.Thread(target=show_countdown, daemon=True)
