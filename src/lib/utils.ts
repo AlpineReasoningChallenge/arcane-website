@@ -55,7 +55,7 @@ export function formatDate(date: Date): string {
  * @returns Sanitized string
  */
 export function sanitizeInput(input: string): string {
-  return input.trim().toLowerCase().replace(/[<>'"]/g, '')
+  return input.trim().replace(/[<>'"]/g, '')
 }
 
 /**
