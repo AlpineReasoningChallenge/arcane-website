@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import AuthForm from '@/components/auth/AuthForm'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import Snow from '@/components/Snow'
-import Image from 'next/image'
 import { Analytics } from '@vercel/analytics/next';
 
 export default function Home() {
@@ -197,21 +196,16 @@ export default function Home() {
         </div>
         
         {/* ARCANE Title */}
-        <div className="absolute top-[20%] left-1/2 transform -translate-x-1/2 z-10 text-center">
+        <div className="absolute top-[16%] left-1/2 transform -translate-x-1/2 z-10 text-center">
           {/* SEVEN PUZZLES */}
-            <h2 className="text-xl md:text-6xl lg:text-8xl font-arcane text-white mb-6 tracking-wider relative" style={{ top: '-1.5rem' }}>
+            <h4 className="text-xl md:text-6xl lg:text-6xl font-arcane text-white mb-12 tracking-wider relative" style={{ top: '-1.5rem' }}>
             SEVEN PUZZLES
-          </h2>
+          </h4>
 
-          <div className="mb-4" style={{ transform: 'scaleY(1.3)' }}>
-            <Image
-              src="/logo.png"
-              alt="ARCANE"
-              width={800}
-              height={200}
-              className="w-auto h-24 md:h-48 lg:h-56 object-contain"
-              priority
-            />
+          <div className="mb-20" style={{ transform: 'scaleY(1.6)' }}>
+            <h1 className="arcane-text text-7xl md:text-9xl lg:text-[12rem] tracking-wider">
+              ARCANE
+            </h1>
           </div>
           
           {/* Description Text */}

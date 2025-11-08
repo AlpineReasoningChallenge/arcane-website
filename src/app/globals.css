@@ -168,3 +168,83 @@ body {
   pointer-events: none;
   opacity: 0.3;
 }
+
+/* Karsten Regular Font */
+@font-face {
+  font-family: 'Karsten';
+  src: url('/fonts/Karsten-Regular.woff2') format('woff2'),
+       url('/fonts/Karsten-Regular.woff') format('woff'),
+       url('/fonts/Karsten-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ARCANE Text Glow Effect */
+.arcane-text {
+  font-family: 'Karsten', serif;
+  color: white;
+  font-weight: normal;
+  text-shadow: 
+    0 0 15px rgba(128, 255, 255, 0.7),
+    0 0 30px rgba(128, 255, 255, 0.6),
+    0 0 60px rgba(128, 255, 255, 0.5),
+    0 0 90px rgba(128, 255, 255, 0.4),
+    0 0 120px rgba(128, 255, 255, 0.3),
+    0 0 150px rgba(128, 255, 255, 0.2),
+    0 0 180px rgba(128, 255, 255, 0.15);
+  position: relative;
+  display: inline-block;
+}
+
+.arcane-letter {
+  display: inline-block;
+  position: relative;
+}
+
+.arcane-letter-dissolve {
+  display: inline-block;
+  position: relative;
+  animation: dissolve 3s ease-in-out infinite;
+  text-shadow: none !important;
+}
+
+@keyframes dissolve {
+  0%, 100% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  50% {
+    opacity: 0.7;
+    filter: blur(1px);
+  }
+}
+
+.arcane-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(128, 255, 255, 1);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 
+    0 0 4px rgba(128, 255, 255, 1),
+    0 0 8px rgba(128, 255, 255, 0.8),
+    0 0 12px rgba(128, 255, 255, 0.6);
+  animation: particle-float 2s ease-out forwards;
+  z-index: 1000;
+}
+
+@keyframes particle-float {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(40px, -30px) scale(0.2);
+  }
+}
