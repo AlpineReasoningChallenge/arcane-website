@@ -63,7 +63,12 @@ def check_and_update_answers():
         supabase.table("user_puzzle_attempts").update({"username": username}).eq("id", attempt_id).execute()
         print(f"Updated ID {attempt_id} (Puzzle {puzzle_id}) -> {'CORRECT' if is_correct else 'INCORRECT'}")
         
-        send_submission_notification(
+        # Send email notification
+        try:
+            user_profile = supabase.table("profiles").select("email").eq("id", user_id).execute()
+            if user_profile.data and len(user_profile.data) > 0:
+                user_email = user_profile.data[0]["email"]
+                send_submission_notification(
                     recipient_email=user_email,
                     puzzle_id=puzzle_id,
                     state="correct" if is_correct else "incorrect"
