@@ -7,6 +7,7 @@ import AuthForm from '@/components/auth/AuthForm'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import Snow from '@/components/Snow'
 import Image from 'next/image'
+import { Analytics } from '@vercel/analytics/next';
 
 export default function Home() {
   const { user } = useAuth()
@@ -97,7 +98,7 @@ export default function Home() {
       {/* Snow Effect - Only active when lore section is in view */}
       <Snow isActive={isLoreInView} />
 
-
+      <Analytics />
       {/* Hero Section */}
       <section className="relative min-h-screen overflow-hidden grainy-bg">
         {/* Dark Background with Grainy Texture */}
