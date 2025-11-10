@@ -136,6 +136,22 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* Warning Banner */}
+  <div className="bg-yellow-400/60 text-black px-4 py-3 flex items-center justify-center gap-3 border-b border-yellow-600/20">
+        <span className="text-2xl">🚨</span>
+        <span className="font-semibold">
+          Have you filled out the mandatory roster form? Every team member must fill it out!{' '}
+          <a
+            href="https://forms.gle/yyb8ZvfDomWn5cJeA"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-black/80"
+          >
+            https://forms.gle/yyb8ZvfDomWn5cJeA
+          </a>
+        </span>
+      </div>
+
       {/* Main Content */}
       <main className="flex gap-8 max-w-[70vw] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Left Content */}
